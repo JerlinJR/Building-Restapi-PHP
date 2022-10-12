@@ -1,15 +1,18 @@
 <?php
     error_reporting(E_ALL ^ E_DEPRECATED);
     require_once("REST.api.php");
-    require_once("libs/Database.class.php");
+    require_once("lib/Database.class.php");
+
 
     class API extends REST {
 
         public $data = "";
 
+        private $db = NULL;
+
         public function __construct(){
             parent::__construct();                // Init parent contructor
-            $this->db = Database::getConnection();                    // Initiate Database connection
+            $this->db = Database::getConnection();// Initiate Database connection
         }
 
         /*
