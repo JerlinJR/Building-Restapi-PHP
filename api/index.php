@@ -3,6 +3,7 @@
     require_once("REST.api.php");
     require_once("lib/Database.class.php");
     require_once("lib/Signup.class.php");
+    
 
 
 
@@ -26,7 +27,7 @@
             $func = strtolower(trim(str_replace("/","",$_REQUEST['rquest'])));
             if((int)method_exists($this,$func) > 0)
                 $this->$func();
-            else
+            else 
                 $this->response('',400);                // If the method not exist with in this class, response would be "Page not found".
         }
 
@@ -88,23 +89,71 @@
             $data = $this->json($_SERVER);
         }
 
-        function generate_hash(){
-            $bytes = random_bytes(16);
-            return bin2hex($bytes);
-        }
         private function gen_hash(){
+            $st = microtime(true);
             if(isset($this->_request['pass'])){
+                $cost = (int)$this->_request['cost'];
                 $s = new Signup("",$this->_request['pass'],"");
-                $hash = $s->hashPassword();
+                $hash = $s->hashPassword($cost);
                 $data = [
                     "hash" => $hash,
-                    "verify_status" => password_verify($this->_request['pass'],$hash)
+                    "val" => $this->_request['pass'],
+                    "info" => password_get_info($hash),
+                    "verify_status" => password_verify($this->_request['pass'],$hash),
+                    "time" => microtime(true) - $st
                 ];
                 $data = $this->json($data);
                 $this->response($data,200);
             } else {
                 echo "Pass the value";
             }
+        }
+
+        private function verify_hash(){
+            $st = microtime(true);
+            if(isset($this->_request['pass']) and isset($this->_request['hash'])){
+            $data = [
+                "password" => $this->_request['pass'],
+                "hash" => $this->_request['hash'],
+                "info" => password_get_info($hash),
+                "verify_status" => password_verify($this->_request['pass'],$this->_request['hash']),
+                "time" => microtime(true) - $st
+            ];
+            $data = $this->json($data);
+            $this->response($data,200);
+            }
+        }
+
+        private function signup(){
+
+            if($this->get_request_method() == "POST" and isset($this->_request['username']) and isset($this->_request['email']) and isset($this->_request['password'])){
+                $username = $this->_request['username'];
+                $email = $this->_request['email'];
+                $password = $this->_request['password'];
+
+                try{
+                    $s = new Signup($username,$password,$email);
+                    $data = [
+                        "message" => "Signup Sucess",
+                        "userid" => $s->getInsertID()
+                    ];
+                    $this->response($this->json($data),200);
+                } catch(Exception $e) {
+                    $data = [
+                        "error" => $e->getMessage()
+                    ];
+                    $this->response($this->json($data),409);
+
+                }
+
+            } else {
+                $data = [
+                    "error" => "Bad request"
+                ];
+                $data = $this->json($data);
+                $this->response($data,400);
+            }
+
         }
 
 
