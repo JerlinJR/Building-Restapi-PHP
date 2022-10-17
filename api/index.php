@@ -93,8 +93,7 @@
             $st = microtime(true);
             if(isset($this->_request['pass'])){
                 $cost = (int)$this->_request['cost'];
-                $s = new Signup("",$this->_request['pass'],"");
-                $hash = $s->hashPassword($cost);
+                $data = password_hash($this->_request['pass'], PASSWORD_BCRYPT);
                 $data = [
                     "hash" => $hash,
                     "val" => $this->_request['pass'],
