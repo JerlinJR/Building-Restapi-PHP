@@ -1,8 +1,8 @@
 <?php
     error_reporting(E_ALL ^ E_DEPRECATED);
-    require_once("REST.api.php");
-    require_once("lib/Database.class.php");
-    require_once("lib/Signup.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT']."/api/REST.api.php");
+    require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Database.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Signup.class.php");
     
 
 
@@ -148,7 +148,7 @@
 
             } else {
                 $data = [
-                    "error" => "Bad request"
+                    "errorr" => "Bad request"
                 ];
                 $data = $this->json($data);
                 $this->response($data,400);

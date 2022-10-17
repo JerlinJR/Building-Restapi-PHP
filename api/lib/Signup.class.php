@@ -1,7 +1,7 @@
 <?php
 
-require_once("Database.class.php");
-require '../vendor/autoload.php';
+require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Database.class.php");
+require $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 
 class Signup{
 
@@ -34,14 +34,15 @@ class Signup{
     public function sendEmailVerification(){
         $config_json = file_get_contents($_SERVER['DOCUMENT_ROOT'].'/../env.json');
         $config = json_decode($config_json, true);
+        $token = $this->token;
 
         $email = new \SendGrid\Mail\Mail();
-        $email->setFrom("noreply@jerlin.space", "API Test");
+        $email->setFrom("noreply@jerlin.space", "Api test");
         $email->setSubject("Verify your account");
         $email->addTo($this->email, $this->username);
-        $email->addContent("text/plain", "Please verify your account at : https://".$config['domain']."/verify?token=$token");
+        $email->addContent("text/plain", "Please verify your account at : https://apitest.jerlin.space/verify?token=$token");
         $email->addContent(
-            "text/html", "<strong>Please verify your account at : <a href=\"https://".$config['domain']."/verify?token=$token\">clicking here</a></strong>"
+            "text/html", "<strong>Please verify your account at : <a href=\"https://apitest.jerlin.space/verify?token=$token\">click here</a></strong>"
         );
         $sendgrid = new \SendGrid($config['email_api']);
         try {
@@ -67,6 +68,24 @@ class Signup{
             'cost'=> $cost,
         ];
         return password_hash($this->password, PASSWORD_BCRYPT,$options);
+    }
+
+    public static function verifyAccount($token){
+
+        $sql = "SELECT * FROM `auth` WHERE token='$token';";
+        $db = Database::getConnection();
+        $result = mysqli_query($db,$sql);
+        if($result and mysqli_num_rows($result) == 1){
+            $data = mysqli_fetch_assoc($result);
+            if($data['active'] == 1){
+                throw new Exception("Already Verified");
+            }
+            mysqli_query($db, "UPDATE `auth` SET `active` = '1' WHERE (`token` = '$token');");
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
 
