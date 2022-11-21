@@ -22,26 +22,9 @@ class Superhero {
         $dir = __DIR__.'/api/apis';
         $methods = scandir($dir);
 
-        // foreach($methods as $m){
-        //     if($m == '.' or $m == '..'){
-        //         continue;
-        //     }
-        //     $basem = basename($m,'.php');
-        //     echo "Trying to call $basem of $method";
-        //     if($basem == $method){
-        //         include $dir."/".$m;
-        //         $func = Closure::bind(${$basem}, $this, get_class());
-        //         if(is_callable($func)){
-        //             return call_user_func_array($func,$args);
-        //         } else { 
-        //             echo "Something Went wrong";
-        //         }
-        //     }
-        // }
-
         foreach($methods as $m){
             if($m == "." or $m == ".."){
-                echo $m;
+        
                 continue;
             }
             $basem = basename($m, '.php');
