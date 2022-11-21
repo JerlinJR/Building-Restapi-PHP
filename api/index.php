@@ -12,6 +12,7 @@
         public $data = "";
 
         private $db = NULL;
+        private $current_call;
 
         public function __construct(){
             parent::__construct();                // Init parent contructor
@@ -27,20 +28,50 @@
             $func = strtolower(trim(str_replace("/","",$_REQUEST['rquest'])));
             if((int)method_exists($this,$func) > 0)
                 $this->$func();
-            else 
-                $this->response('',400);                // If the method not exist with in this class, response would be "Page not found".
+            else {
+                if(isset($_GET['namespace'])){
+                    $dir = $_SERVER['DOCUMENT_ROOT'] .'/api/apis/'.$_GET['namespace'];
+                    $methods = scandir($dir);
+                    // var_dump($methods);
+            
+                    foreach($methods as $m){
+                        if($m == "." or $m == ".."){
+                            continue;
+                        }
+                        $basem = basename($m, '.php');
+                        // echo "Trying to call $basem() for $func()\n";
+                        if($basem == $func){
+                            include $dir."/".$m;
+                            $this->current_call = Closure::bind(${$basem}, $this, get_class());
+                            $this->basem();
+                        }
+                    }
+                } else {
+                    $this->response($this->json(['error' => 'method_not_found']),404);
+                }
+            }
         }
+
+        public function __call($method,$args){
+
+            if(is_callable($this->current_call)){
+                return call_user_func_array($this->current_call, $args);
+            } else {
+                $this->response($this->json(['error' => 'method_not_callable']),404);
+            }
+        }
+
 
         /*************API SPACE START*******************/
 
         private function about(){
 
             if($this->get_request_method() != "POST"){
-                $error = array('status' => 'WRONG_CALL', "msg" => "The type of call cannot be accepted by our servers.");
+                $error = array('status' => 'WRONG_CALL','method' => $this->get_request_method(), "msg" => "The type of call cannot be accepted by our servers.");
                 $error = $this->json($error);
                 $this->response($error,406);
             }
-            $data = array('version' => $this->_request['version'], 'desc' => 'This API is created by Blovia Technologies Pvt. Ltd., for the public usage for accessing data about vehicles.');
+            $data = array('version' => $this->_request['version'],'method' => $this->get_request_method(), 'desc' => 'This API is created by Blovia Technologies Pvt. Ltd., for the public usage for accessing data about vehicles.');
             $data = $this->json($data);
             $this->response($data,200);
 
@@ -93,7 +124,8 @@
             $st = microtime(true);
             if(isset($this->_request['pass'])){
                 $cost = (int)$this->_request['cost'];
-                $data = password_hash($this->_request['pass'], PASSWORD_BCRYPT);
+                $s = new Signup("",$this->_request['pass'],"");
+                $hash = $s->hashPassword($cost);
                 $data = [
                     "hash" => $hash,
                     "val" => $this->_request['pass'],
@@ -122,42 +154,6 @@
             $this->response($data,200);
             }
         }
-
-        private function signup(){
-
-            if($this->get_request_method() == "POST" and isset($this->_request['username']) and isset($this->_request['email']) and isset($this->_request['password'])){
-                $username = $this->_request['username'];
-                $email = $this->_request['email'];
-                $password = $this->_request['password'];
-
-                try{
-                    $s = new Signup($username,$password,$email);
-                    $data = [
-                        "message" => "Signup Sucess",
-                        "userid" => $s->getInsertID()
-                    ];
-                    $this->response($this->json($data),200);
-                } catch(Exception $e) {
-                    $data = [
-                        "error" => $e->getMessage()
-                    ];
-                    $this->response($this->json($data),409);
-
-                }
-
-            } else {
-                $data = [
-                    "errorr" => "Bad request"
-                ];
-                $data = $this->json($data);
-                $this->response($data,400);
-            }
-
-        }
-
-
-
-
 
 
         /*************API SPACE END*********************/
