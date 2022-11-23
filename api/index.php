@@ -3,6 +3,9 @@
     require_once($_SERVER['DOCUMENT_ROOT']."/api/REST.api.php");
     require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Database.class.php");
     require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Signup.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Auth.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/User.class.php");
+
     
 
 
