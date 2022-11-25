@@ -1,6 +1,8 @@
 <?php
 
 require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Database.class.php");
+require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/OAuth.class.php");
+require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/User.class.php");
 require $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 
 class Auth{
@@ -9,7 +11,7 @@ class Auth{
     private $user;
     private $db;
     private $isTokenAuth = false;
-    private $loginInToken;
+    private $loginInTokens;
 
     public function __construct($username,$password = NULL){
         $this->db = Database::getConnection();
@@ -34,7 +36,7 @@ class Auth{
                 if(!$user->isActive()){
                     throw new Exception("Please Check your email and activate your account");
                 }
-                $this->logInToken = $this->addSession();
+                $this->logInTokens = $this->addSession();
                 //generate Token
             } else {
                 throw new Exception("Password Mismatch");
@@ -44,14 +46,9 @@ class Auth{
     }
 
     private function addSession(){
-        $token = Auth::generateToken(32);
-        $sql = "INSERT INTO `session` (`username`, `access_token`, `created_at`, `valid`, `refresh_token`, `valid_for`, `reference_token`)
-        VALUES ('$this->username', '$token', now(), '1', NULL, '7200', NULL);";
-        if(mysqli_query($this->db,$sql)){
-            return $token;
-        } else {
-            throw new Exception("Unable to create Session");
-        }
+        $oauth = new OAuth($this->username);
+        $session = $oauth->newSession();
+        return $session;
     }
 
 
@@ -61,8 +58,8 @@ class Auth{
     
     }
 
-    public function getAuthToken(){
-        return $this->logInToken;
+    public function getAuthTokens(){
+        return $this->logInTokens;
     }
 
 

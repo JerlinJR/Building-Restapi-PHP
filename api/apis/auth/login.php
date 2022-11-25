@@ -12,7 +12,7 @@ ${basename(__FILE__, '.php')} = function(){
             $auth = new Auth($username,$password);
             $data = [
                 "message" => "Login Sucess",
-                "token" => $auth->getAuthToken()
+                "token" => $auth->getAuthTokens()
             ];
             $data = $this->json($data);
             $this->response($data, 200);
