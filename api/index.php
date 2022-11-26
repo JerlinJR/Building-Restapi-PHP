@@ -6,16 +6,13 @@
     require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/Auth.class.php");
     require_once($_SERVER['DOCUMENT_ROOT']."/api/lib/User.class.php");
 
-    
-
-
-
     class API extends REST {
 
         public $data = "";
 
         private $db = NULL;
         private $current_call;
+        private $auth;
 
         public function __construct(){
             parent::__construct();                // Init parent contructor
@@ -34,25 +31,74 @@
             else {
                 if(isset($_GET['namespace'])){
                     $dir = $_SERVER['DOCUMENT_ROOT'] .'/api/apis/'.$_GET['namespace'];
-                    $methods = scandir($dir);
+                    $file = $dir.'/'.$func.'.php';
+                    if(file_exists($file)){
+                            include $file;
+                            $this->current_call = Closure::bind(${$func}, $this, get_class());
+                            $this->func();
+                    } 
+                
+                    /**
+                     * Use this snippet
+                     * When you want to include multiple file @ same time 
+                     * <-----START----->
+                     */
+
+                    // $methods = scandir($dir);
                     // var_dump($methods);
-            
-                    foreach($methods as $m){
-                        if($m == "." or $m == ".."){
-                            continue;
-                        }
-                        $basem = basename($m, '.php');
-                        // echo "Trying to call $basem() for $func()\n";
-                        if($basem == $func){
-                            include $dir."/".$m;
-                            $this->current_call = Closure::bind(${$basem}, $this, get_class());
-                            $this->basem();
-                        }
-                    }
+                    // foreach($methods as $m){
+                    //     if($m == "." or $m == ".."){
+                    //         continue;
+                    //     }
+                    //     $basem = basename($m, '.php');
+                    //     // echo "Trying to call $basem() for $func()\n";
+                    //     if($basem == $func){
+                    //         include $dir."/".$m;
+                    //         $this->current_call = Closure::bind(${$basem}, $this, get_class());
+                    //         $this->basem();
+                    //     }
+                    // }
+                    /*.
+                     * <-----END----->
+                     */
+
                 } else {
                     $this->response($this->json(['error' => 'method_not_found']),404);
                 }
             }
+        }
+
+        public function auth(){
+
+            $header = getallheaders();
+            if(isset($header['Authorization'])){
+                $token = explode(' ',$header['Authorization']);
+                $this->auth = new Auth($token[1]);
+            }
+        }
+
+        public function isAuthenticated(){
+            if($this->auth == null){
+                return false;
+            }
+            
+            if($this->auth->getOAuth()->authenticate() and isset($_SESSION['username'])){
+                return true;
+            } else {
+            return false;
+            }
+        }
+
+        public function getUsername(){
+            return $_SESSION['username'];
+        }
+
+        public function die($e){
+            $data = [
+                "error" => $e->getMessage()
+            ];
+            $data = $this->json($data);
+            $this->response($data,400);
         }
 
         public function __call($method,$args){
@@ -177,5 +223,11 @@
     // Initiiate Library
 
     $api = new API;
-    $api->processApi();
+    try{
+        $api->auth();
+        $api->processApi();
+    } catch (Exception $e) {
+        $api->die($e);
+    }
+
 ?>

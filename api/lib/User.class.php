@@ -8,6 +8,7 @@ class User{
 
     private $db;
     private $user;
+    private $username;
 
     public function __construct($username){
         $this->db = Database::getConnection();
@@ -20,7 +21,7 @@ class User{
             throw new Exception("User Not Found");
         }
     }
-
+    
     public function getUserName(){
         return $this->user['username'];
     }
