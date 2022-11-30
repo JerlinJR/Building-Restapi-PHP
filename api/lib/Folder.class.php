@@ -22,7 +22,7 @@ class Folder extends Share{
     }
 
     public function createNew($name = "Untitled"){
-        if(isset($_SESSION['username'])){
+        if(isset($_SESSION['username']) and strlen($name) <= 45){
             $query = "INSERT INTO `folders` (`name`, `owner`, `created_at`)
             VALUES ('$name', '$_SESSION[username]', now());";
             if(mysqli_query($this->db, $query)){
@@ -30,7 +30,7 @@ class Folder extends Share{
                 return $this->id;
             }
         } else {
-            throw new Exception("Session user not present");
+            throw new Exception("Cannot create notes");
         }
 
     }
@@ -39,6 +39,26 @@ class Folder extends Share{
         if($this->data && $this->data['name']){
             return $this->data['name'];
         }
+    }
+
+    public function createdAt(){
+        if($this->data and isset($this->data['created_at'])){
+            return $this->data['created_at'];
+        }
+    }
+
+    public function getId(){
+        if($this->id){
+            return $this->id;
+        }
+    }
+
+    public function countNotes(){
+        
+    }
+
+    public function getAllNotes(){
+
     }
 
     public function refresh(){
@@ -65,9 +85,19 @@ class Folder extends Share{
         }
     }
 
+    public function delete(){
+
+    }
+
 
     public static function getAllFolders(){
 
+    }
+
+    public function getOwner(){
+        if(isset($this->data) and $this->data['owner']){
+            return $this->data['owner'];
+        }
     }
 
 }

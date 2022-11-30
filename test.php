@@ -7,8 +7,11 @@ require $_SERVER['DOCUMENT_ROOT'].'/vendor/autoload.php';
 session_start();
 $_SESSION['username'] = "Jerlin1";
 
-$f = new Folder(12);
+// $f = new Folder(12);
 
-echo $f->getName();
-$f->rename("Hello");
-echo $f->getName();
+// echo $f->getName();
+// $f->rename("Hello");
+// echo $f->getName();
+
+$a = new Folder();
+$a->createNew('Personal');
