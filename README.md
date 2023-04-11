@@ -90,3 +90,18 @@ We also need to create a mysql username and password and give the database previ
 
     mysql> exit
     Bye
+    
+    Now fix the file permissions for /var/www folder like you own it. The below command will change the owner of the foler /var/www as you, so that no errors will come when you try to edit or create.
+
+
+$ cd /var
+$ sudo chown $(whoami):$(whoami) -R www
+
+
+
+Now import the database export located at database/export.sql into the database you just created and we have all the tables.
+
+Now update the env.json file with the user and database info created. All set, your code should be accessible at http://localhost or whereever you configured it to work.
+
+## Security
+All the data that you get with $this->_request[] inside the APIs are secured with mysqli_real_escape_string during the API initialization. Look for the function called REST::cleanInputs() inside api/REST.api.php and here is where it happens. So this development is considered secured from MySQLi injections. If you access $_GET or $_POST anywhere else directly without $this->_request[], then you might just need to filter the inputs yourself and make them secure.
