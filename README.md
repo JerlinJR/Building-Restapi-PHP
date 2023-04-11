@@ -32,3 +32,61 @@ Virtual Host Apache Configuration:
                 Require all granted
         </Directory>
     </VirtualHost>
+    
+    In the above configuration, env.json should sit exactly /var/www/env.json here.
+
+Configuring your own Ubuntu Setup
+Reference: [Digital Ocean Ubuntu Setup](https://www.digitalocean.com/community/tutorials/how-to-install-linux-apache-mysql-php-lamp-stack-on-ubuntu-20-04)
+
+Update and upgrade the system first.
+
+
+    $ sudo apt update && sudo apt -y upgrade
+
+
+
+Install Apache, MySQL and PHP
+
+
+    $ sudo apt install apache2 libapache2-mod-php mysql-server php-mysql
+
+
+
+Secure MySQL Database
+
+
+    $ sudo mysql_secure_installation
+
+
+and follow the onscreen steps. For more info, check the above link.
+
+Create a Database
+
+
+    $ mysql -u root -p
+    Password:
+
+
+Enter the password you have given for root during mysql_secure_installation and you can see the following promot.
+
+    mysql>
+
+
+    From here, we need to create a database called
+
+    mysql> CREATE DATABASE Your Database Name;
+
+
+We also need to create a mysql username and password and give the database previleges for the database we created.
+
+    mysql> CREATE USER 'root'@'localhost' IDENTIFIED BY 'password';
+    Query OK, 0 rows affected (0.02 sec)
+
+    mysql> GRANT ALL PRIVILEGES ON * . * TO 'apiuser'@'localhost';
+    Query OK, 0 rows affected (0.00 sec)
+
+    mysql> FLUSH PRIVILEGES;
+    Query OK, 0 rows affected (0.01 sec)
+
+    mysql> exit
+    Bye
