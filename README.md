@@ -13,3 +13,22 @@ Right outside the document root, create a file called env.json and keep the cont
         "server": "Your Host",
         "email_api_key": "Your_Sendgrid_Key"
     }
+
+This will be called by the API functions to get the database connection.
+
+Virtual Host Apache Configuration:
+
+    <VirtualHost *:80>
+        ServerAdmin hello@jerlin.me       
+        DocumentRoot "/var/www/Building-Restapi-PHP"
+        ServerName apitest.jerlin.space 
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+        <Directory "/var/www/Building-Restapi-PHP">
+                Options Indexes FollowSymLinks ExecCGI Includes
+                AllowOverride All
+                Require all granted
+        </Directory>
+    </VirtualHost>
