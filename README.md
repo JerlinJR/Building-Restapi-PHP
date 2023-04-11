@@ -91,11 +91,11 @@ We also need to create a mysql username and password and give the database previ
     mysql> exit
     Bye
     
-    Now fix the file permissions for /var/www folder like you own it. The below command will change the owner of the foler /var/www as you, so that no errors will come when you try to edit or create.
+Now fix the file permissions for /var/www folder like you own it. The below command will change the owner of the foler /var/www as you, so that no errors will come when you try to edit or create.
 
 
-$ cd /var
-$ sudo chown $(whoami):$(whoami) -R www
+    $ cd /var
+    $ sudo chown $(whoami):$(whoami) -R www
 
 
 
